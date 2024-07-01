@@ -36,10 +36,6 @@ custom_api_configuration = {
         "allow_headers": "*",
         "allow_credentials": False,
     },
-    "cache": {
-        "enabled": True,
-        "time": 0.750
-    },
     "access": {
         "max_login_attempts": 50,
         "block_time": 300,
@@ -59,6 +55,17 @@ custom_api_configuration = {
         "agents": {
             "allow_higher_versions": {
                 "allow": True
+            }
+        },
+        "indexer": {
+            "allow": True
+        },
+        "integrations": {
+            "virustotal": {
+                "public_key": {
+                    "allow": True,
+                    "minimum_quota": 240
+                }
             }
         }
     }
@@ -128,9 +135,6 @@ def test_read_configuration(mock_open, mock_exists, read_config):
     {'cors': {'allow_headers': 12345}},
     {'cors': {'allow_credentials': 12345}},
     {'cors': {'invalid_subkey': 'value'}},
-    {'cache': {'enabled': 'invalid_type'}},
-    {'cache': {'time': 'invalid_type'}},
-    {'cache': {'invalid_subkey': 'value'}},
     {'access': {'max_login_attempts': 'invalid_type'}},
     {'access': {'block_time': 'invalid_type'}},
     {'access': {'max_request_per_minute': 'invalid_type'}},
@@ -141,7 +145,9 @@ def test_read_configuration(mock_open, mock_exists, read_config):
     {'remote_commands': {'wodle_command': {'enabled': 'invalid_type'}}},
     {'remote_commands': {'wodle_command': {'exceptions': [0, 1, 2]}}},
     {'remote_commands': {'wodle_command': {'invalid_subkey': 'invalid_type'}}},
-    {'agents': {'allowed_higher_versions': {'allow': []}}},
+    {'agents': {'allow_higher_versions': {'allow': True}}},
+    {'indexer': {'allow': True}},
+    {'integrations': {'virustotal': {'public_key': {'allow': True}}}},
 ])
 @patch('os.path.exists', return_value=True)
 def test_read_wrong_configuration(mock_exists, config):

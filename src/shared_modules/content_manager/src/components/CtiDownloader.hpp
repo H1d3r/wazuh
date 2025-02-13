@@ -149,14 +149,14 @@ protected:
             {
                 if (!rawMetadata.contains(key))
                 {
-                    logWarn(WM_CONTENTUPDATER, "Missing CTI metadata key: %s", key.c_str());
+                    logWarn(WM_CONTENTUPDATER, "Missing CTI metadata key: %s.", key.c_str());
                     return false;
                 }
 
                 const auto& data {rawMetadata.at(key)};
                 if (data.is_null() || (data.is_string() && data.get_ref<const std::string&>().empty()))
                 {
-                    logWarn(WM_CONTENTUPDATER, "Null or empty CTI metadata value for key: %s", key.c_str());
+                    logWarn(WM_CONTENTUPDATER, "Null or empty CTI metadata value for key: %s.", key.c_str());
                     return false;
                 }
 
@@ -218,7 +218,13 @@ protected:
         {
             try
             {
-                m_urlRequest.get(HttpURL(URL + queryParameters), onSuccess, onError, outputFilepath);
+                m_urlRequest.get(HttpURL(URL + queryParameters),
+                                 onSuccess,
+                                 onError,
+                                 outputFilepath,
+                                 DEFAULT_HEADERS,
+                                 {},
+                                 m_spUpdaterContext->spUpdaterBaseContext->httpUserAgent);
                 return;
             }
             catch (const cti_server_error& e)

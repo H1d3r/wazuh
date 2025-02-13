@@ -115,7 +115,7 @@ class WazuhAsyncSocket:
         self.writer = None
 
     async def connect(self, path_to_socket: str):
-        """Establish connection with the socket and creates both Transport 
+        """Establish connection with the socket and creates both Transport
         and Protocol objects to operate with it.
 
         Parameters
@@ -194,11 +194,11 @@ class WazuhAsyncSocket:
 
 
 class WazuhAsyncSocketJSON(WazuhAsyncSocket):
-    """Handler class to connect and operate asynchronously with a socket using 
+    """Handler class to connect and operate asynchronously with a socket using
     messages in JSON format."""
 
     async def send(self, msg_bytes: str, header_format: str = "<I") -> bytes:
-        """Convert the message from JSON format to bytes and send it to the socket. 
+        """Convert the message from JSON format to bytes and send it to the socket.
         Returns that message.
 
         Parameters
@@ -239,74 +239,6 @@ class WazuhAsyncSocketJSON(WazuhAsyncSocket):
             if response['error'] != 0:
                 raise WazuhException(response['error'], response['message'], cmd_error=True)
         return response['data']
-
-
-daemons = {
-    "authd": {"protocol": "TCP", "path": common.AUTHD_SOCKET, "header_format": "<I", "size": 4},
-    "task-manager": {"protocol": "TCP", "path": common.TASKS_SOCKET, "header_format": "<I", "size": 4},
-    "wazuh-db": {"protocol": "TCP", "path": common.WDB_SOCKET, "header_format": "<I", "size": 4},
-    "remoted": {"protocol": "TCP", "path": common.REMOTED_SOCKET, "header_format": "<I", "size": 4}
-}
-
-
-async def wazuh_sendasync(daemon_name: str, message: str = None) -> dict:
-    """Send a message to the specified daemon's socket and wait for its response.
-
-    Parameters
-    ----------
-    daemon_name : str
-        Name of the daemon to send the message.
-    message : str, optional
-        Message in JSON format to be sent to the daemon's socket.
-
-    Returns
-    -------
-    dict
-        Data received.
-    """
-    sock = WazuhAsyncSocketJSON()
-    await sock.connect(daemons[daemon_name]['path'])
-    await sock.send(message, daemons[daemon_name]['header_format'])
-    data = await sock.receive(daemons[daemon_name]['size'])
-    sock.close()
-
-    return data
-
-
-async def wazuh_sendsync(daemon_name: str = None, message: str = None) -> dict:
-    """Send a message to the specified daemon's socket and wait for its response.
-
-    Parameters
-    ----------
-    daemon_name : str
-        Name of the daemon to send the message.
-    message : str, optional
-        Message in JSON format to be sent to the daemon's socket.
-
-    Raises
-    ------
-    WazuhInternalError(1014)
-        Error communicating with socket.
-
-    Returns
-    -------
-    dict
-        Data received.
-    """
-    try:
-        sock = WazuhSocket(daemons[daemon_name]['path'])
-        if isinstance(message, dict):
-            message = dumps(message)
-        sock.send(msg_bytes=message.encode(), header_format=daemons[daemon_name]['header_format'])
-        data = sock.receive(header_format=daemons[daemon_name]['header_format'],
-                            header_size=daemons[daemon_name]['size']).decode()
-        sock.close()
-    except WazuhException as e:
-        raise e
-    except Exception as e:
-        raise WazuhInternalError(1014, extra_message=e)
-
-    return data
 
 
 def create_wazuh_socket_message(origin=None, command=None, parameters=None):
